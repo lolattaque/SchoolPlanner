@@ -24,15 +24,18 @@ def signup(request):
         form = UserCreationForm()
     return render(request, "core/signup.html", {"form": form})
 
+
 @login_required
 def dashboard(request):
     profile = request.user.profile
 
+    # Handle Target Program Update
     if request.method == "POST" and 'update_program' in request.POST:
         profile.target_program = request.POST.get('target_program')
         profile.save()
         return redirect('dashboard')
 
+    # Handle Task Creation
     if request.method == "POST" and 'add_task' in request.POST:
         form = TaskForm(request.POST)
         if form.is_valid():
@@ -44,9 +47,19 @@ def dashboard(request):
     else:
         form = TaskForm()
 
-    tasks = Task.objects.filter(user=request.user, stage=profile.stage).order_by('completed', 'due_date')
+    tasks = Task.objects.filter(
+        user=request.user,
+        stage=profile.stage
+    ).order_by('completed', 'due_date')
+
     active_tasks = tasks.filter(completed=False)
+
+    # Pass both tasks and the user for specific AI tailoring
     suggestions = generate_ai_suggestions(active_tasks, request.user)
+
+    total_count = tasks.count()
+    completed_count = tasks.filter(completed=True).count()
+    progress_percent = int((completed_count / total_count) * 100) if total_count > 0 else 0
 
     return render(request, "core/dashboard.html", {
         "tasks": tasks,
@@ -54,6 +67,7 @@ def dashboard(request):
         "suggestions": suggestions,
         "profile": profile,
         "stage": profile.get_stage_display(),
+        "progress_percent": progress_percent,
     })
 
 
