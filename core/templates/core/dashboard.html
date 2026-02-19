@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Academic Dashboard - School Planner</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        /* RESET & BASE */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+            background: #0f172a;
+            background-attachment: fixed;
+            color: #f1f5f9;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        /* HEADER SECTION */
+        header {
+            max-width: 1400px;
+            margin: 0 auto 30px auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .user-info h1 { font-size: 1.8rem; letter-spacing: -0.5px; }
+        .user-info p { color: #94a3b8; font-size: 0.95rem; }
+        .stage-badge { background: #3b82f6; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; vertical-align: middle; }
+
+        /* BUTTONS */
+        .button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 20px;
+            font-weight: 600;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.85rem;
+            text-decoration: none;
+        }
+
+        .btn-primary { background: #3b82f6; color: white; width: 100%; }
+        .btn-success { background: #10b981; color: white; }
+        .btn-danger { background: #ef4444; color: white; }
+        .btn-outline { background: transparent; border: 1px solid #475569; color: #cbd5e1; }
+        .btn-ghost { background: #334155; color: white; margin-top: 10px; }
+
+        .button:hover { filter: brightness(1.1); transform: translateY(-1px); }
+
+        /* MAIN LAYOUT GRID */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 30px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* CARD COMPONENT */
+        .card {
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 16px;
+            padding: 24px;
+            backdrop-filter: blur(12px);
+            margin-bottom: 25px;
+        }
+
+        h2 { font-size: 1.1rem; margin-bottom: 20px; color: #3b82f6; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 10px; }
+
+        /* FORMS */
+        .add-task-form p { margin-bottom: 15px; }
+        .add-task-form label { display: block; margin-bottom: 5px; font-size: 0.85rem; color: #94a3b8; }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #334155;
+            background: #0f172a;
+            color: white;
+            outline: none;
+            margin-bottom: 10px;
+        }
+
+        /* TASK LIST */
+        .tasks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .task-card {
+            background: #1e293b;
+            border-left: 4px solid #3b82f6;
+            padding: 20px;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .task-card.completed { border-left-color: #10b981; opacity: 0.6; }
+        .task-meta { font-size: 0.8rem; color: #94a3b8; margin: 8px 0; }
+        .task-actions { display: flex; gap: 8px; border-top: 1px solid #334155; padding-top: 15px; margin-top: 10px; }
+
+        /* AI SIDEBAR */
+        .suggestion-item {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            padding: 14px;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            font-size: 0.9rem;
+            list-style: none;
+            border-left: 3px solid #3b82f6;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 1024px) {
+            .dashboard-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div class="user-info">
+            <h1>Welcome, {{ user.username }}!</h1>
+            <p><span class="stage-badge">{{ stage }}</span> Goal: <strong>{{ profile.target_program|default:"Not set" }}</strong></p>
+        </div>
+        <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="button btn-outline">Logout</button>
+        </form>
+    </header>
+
+    <div class="dashboard-grid">
+
+        <main class="content-area">
+            <div class="card">
+                <h2><span>🎓</span> Academic Goal</h2>
+                <form method="post">
+                    {% csrf_token %}
+                    <label style="font-size: 0.85rem; color: #94a3b8;">What university program are you targeting?</label>
+                    <input type="text" name="target_program" placeholder="e.g. Computer Science at Waterloo" value="{{ profile.target_program }}">
+                    <button type="submit" name="update_program" class="button btn-ghost" style="width: auto;">Update Goal</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2><span>📝</span> Add Academic Task</h2>
+                <form method="post" class="add-task-form">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit" name="add_task" class="button btn-primary">Add Task</button>
+                </form>
+            </div>
+
+            <h2><span>📅</span> Current Schedule</h2>
+            {% if tasks %}
+                <div class="tasks-grid">
+                    {% for task in tasks %}
+                        <div class="task-card {% if task.completed %}completed{% endif %}">
+                            <div>
+                                <strong>{{ task.title }}</strong>
+                                <div class="task-meta">
+                                    <span>Priority: {{ task.get_importance_display }}</span> •
+                                    <span>Due: {{ task.due_date }}</span>
+                                </div>
+                                <p style="font-size: 0.9rem; color: #cbd5e1;">{{ task.description|truncatewords:15 }}</p>
+                            </div>
+
+                            <div class="task-actions">
+                                {% if not task.completed %}
+                                <form method="post" action="{% url 'complete_task' task.id %}" style="flex:1;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="button btn-success" style="width:100%;">Done</button>
+                                </form>
+                                {% endif %}
+                                <form method="post" action="{% url 'delete_task' task.id %}" style="flex:1;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="button btn-danger" style="width:100%;">Delete</button>
+                                </form>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="card" style="text-align: center; color: #94a3b8;">
+                    <p>No tasks yet! Start by adding your first assignment.</p>
+                </div>
+            {% endif %}
+        </main>
+
+        <aside class="ai-suggestions card">
+            <h2><span>✨</span> AI Academic Plan</h2>
+            <p style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 15px;">Tailored to your goal: {{ profile.target_program|default:"General Success" }}</p>
+            {% if suggestions %}
+                <ul>
+                    {% for suggestion in suggestions %}
+                        <li class="suggestion-item">{{ suggestion }}</li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p style="font-size: 0.85rem; color: #94a3b8;">Add tasks to generate study tips.</p>
+            {% endif %}
+        </aside>
+
+    </div>
+
+</body>
+</html>

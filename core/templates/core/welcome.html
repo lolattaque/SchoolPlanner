@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>School Planner</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1f1c2c, #928dab);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .welcome-card {
+            width: 100%;
+            max-width: 600px;
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(12px);
+            padding: 50px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+
+        p {
+            font-size: 18px;
+            max-width: 500px;
+            margin: 0 auto 30px;
+            opacity: 0.9;
+        }
+
+        a.button {
+            display: inline-block;
+            padding: 12px 25px;
+            margin: 10px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: 0.2s ease;
+        }
+
+        a.button.login {
+            background-color: #2196F3;
+            color: white;
+        }
+
+        a.button.signup {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        a.button:hover {
+            transform: scale(1.05);
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="welcome-card">
+        <h1>School Planner</h1>
+        <p>
+            Organize your school assignments, tests, and goals all in one place.
+            Plan your days, track your progress, and never miss a deadline.
+        </p>
+
+        <a class="button login" href="{% url 'login' %}">Login</a>
+        <a class="button signup" href="{% url 'signup' %}">Sign Up</a>
+    </div>
+
+</body>
+</html>
